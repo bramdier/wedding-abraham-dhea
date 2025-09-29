@@ -17,7 +17,7 @@ function Reservation() {
   const [inputValue, setInputValue] = useState<{
     name: string;
     wish: string;
-    presence: string;
+    presence: "Hadir" | "Tidak Hadir";
     numOfPeople: string | null;
     waktuKehadiran: string | null;
   }>({
@@ -27,22 +27,20 @@ function Reservation() {
     numOfPeople: "",
     waktuKehadiran: "",
   });
+
   const [reservations, setReservations] = useState<DocumentData[]>([]);
 
   useEffect(() => {
     const q = query(collection(db, "reservation"), orderBy("time", "desc"));
-
     return onSnapshot(q, (querySnapshot) => {
       setReservations(
-        querySnapshot.docs.map((doc) => {
-          return { id: doc.id, ...doc.data() };
-        })
+        querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
       );
     });
   }, []);
 
   function getZero(num: number) {
-    return num < 10 ? `0${num}` : num;
+    return num < 10 ? `0${num}` : String(num);
   }
 
   return (
@@ -57,6 +55,7 @@ function Reservation() {
             <br />
             Satu undangan berlaku untuk 1-2 orang
           </p>
+
           <div className="flex flex-col gap-3">
             <input
               type="text"
@@ -67,6 +66,7 @@ function Reservation() {
                 setInputValue({ ...inputValue, name: e.target.value })
               }
             />
+
             <textarea
               placeholder="Berikan Ucapan dan Doa"
               className="h-24 text-[0.8rem] py-2 px-3 placeholder:text-[#5a5a5a50] border-b border-[#A99D87] rounded"
@@ -75,33 +75,35 @@ function Reservation() {
                 setInputValue({ ...inputValue, wish: e.target.value })
               }
             />
+
             <div className="flex items-center gap-2 text-sm">
               <input
                 type="radio"
                 name="presence"
                 id="hadir"
                 value="Hadir"
-                checked={inputValue.presence === "Hadir" ? true : false}
+                checked={inputValue.presence === "Hadir"}
                 onChange={(e) =>
                   setInputValue({
                     ...inputValue,
-                    presence: e.target.value,
+                    presence: e.target.value as "Hadir",
                     numOfPeople: "",
                     waktuKehadiran: "",
                   })
                 }
               />
               <label htmlFor="hadir">Hadir</label>
+
               <input
                 type="radio"
                 name="presence"
                 id="tidak-hadir"
                 value="Tidak Hadir"
-                checked={inputValue.presence === "Tidak Hadir" ? true : false}
+                checked={inputValue.presence === "Tidak Hadir"}
                 onChange={(e) =>
                   setInputValue({
                     ...inputValue,
-                    presence: e.target.value,
+                    presence: e.target.value as "Tidak Hadir",
                     numOfPeople: null,
                     waktuKehadiran: null,
                   })
@@ -109,8 +111,10 @@ function Reservation() {
               />
               <label htmlFor="tidak-hadir">Tidak Hadir</label>
             </div>
+
             {inputValue.presence === "Hadir" && (
               <>
+                {/* Waktu Kehadiran */}
                 <select
                   onChange={(e) =>
                     setInputValue({
@@ -118,16 +122,18 @@ function Reservation() {
                       waktuKehadiran: e.target.value,
                     })
                   }
-                  value={inputValue.waktuKehadiran!}
+                  value={inputValue.waktuKehadiran ?? ""} // 👈 ensure string, not null
                   className="text-[0.8rem] py-2 px-3 border-b border-[#A99D87] rounded font-light text-[#424242] bg-white"
                 >
-                  <option value="" disabled selected>
+                  {/* 👇 no `selected` here */}
+                  <option value="" disabled>
                     Pilih waktu kehadiran
                   </option>
-                  <option value="Akad">Akad</option>
-                  <option value="Resepsi Base 1">Resepsi Base 1</option>
-                  <option value="Resepsi Base 2">Resepsi Base 2</option>
+                  <option value="Pemberkatan">Pemberkatan</option>
+                  <option value="Resepsi">Resepsi</option>
                 </select>
+
+                {/* Jumlah Orang */}
                 <select
                   onChange={(e) =>
                     setInputValue({
@@ -135,25 +141,29 @@ function Reservation() {
                       numOfPeople: e.target.value,
                     })
                   }
-                  value={inputValue.numOfPeople!}
+                  value={inputValue.numOfPeople ?? ""} // 👈 ensure string, not null
                   className="text-[0.8rem] py-2 px-3 border-b border-[#A99D87] rounded font-light text-[#424242] bg-white"
                 >
-                  <option value="" disabled selected>
+                  {/* 👇 no `selected` here */}
+                  <option value="" disabled>
                     Pilih jumlah orang
                   </option>
                   <option value="1">1 Orang</option>
-                  <option value="2">2 Orang</option>``
+                  <option value="2">2 Orang</option>
                 </select>
               </>
             )}
+
             <button
               onClick={() => {
                 if (inputValue.name === "")
                   return alert("Mohon masukkan nama anda.");
-                if (inputValue.waktuKehadiran === "")
-                  return alert("Mohon pilih waktu kehadiran.");
-                if (inputValue.numOfPeople === "")
-                  return alert("Mohon pilih jumlah orang.");
+                if (inputValue.presence === "Hadir") {
+                  if (!inputValue.waktuKehadiran)
+                    return alert("Mohon pilih waktu kehadiran.");
+                  if (!inputValue.numOfPeople)
+                    return alert("Mohon pilih jumlah orang.");
+                }
 
                 sendReservation(
                   inputValue.name,
@@ -162,12 +172,14 @@ function Reservation() {
                   inputValue.numOfPeople,
                   inputValue.waktuKehadiran
                 );
+
                 setInputValue({
                   ...inputValue,
                   name: "",
                   wish: "",
-                  numOfPeople: "",
-                  waktuKehadiran: "",
+                  // Reset only if Hadir
+                  numOfPeople: inputValue.presence === "Hadir" ? "" : null,
+                  waktuKehadiran: inputValue.presence === "Hadir" ? "" : null,
                 });
               }}
               className="text-[0.75rem] bg-[#424242] flex items-center w-fit rounded text-white gap-2 py-2 px-4 font-bold hover:scale-90 ease-linear duration-[0.2s]"
@@ -177,9 +189,10 @@ function Reservation() {
             </button>
           </div>
         </RevealWrapper>
+
         <div className="space-y-4">
           {reservations.map((data) => {
-            const date = new Date(data.time?.seconds * 1000);
+            const date = new Date((data.time?.seconds || 0) * 1000);
             return (
               <div
                 key={data.id}
@@ -202,7 +215,7 @@ function Reservation() {
                   <AiOutlineClockCircle />
                   <span className="flex gap-2">
                     <span>
-                      {getZero(date.getDate())}/{getZero(date.getMonth())}/
+                      {getZero(date.getDate())}/{getZero(date.getMonth() + 1)}/
                       {getZero(date.getFullYear())}
                     </span>
                     <span>

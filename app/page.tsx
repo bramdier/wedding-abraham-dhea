@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
-import Countdown from "./components/Countdown";
 import ArRum from "./components/ArRum";
 import Hero from "./components/Hero";
 import Profile from "./components/Profile";
@@ -13,6 +12,11 @@ import Bank from "./components/Bank";
 import Footer from "./components/Footer";
 import { RevealWrapper } from "next-reveal";
 
+// ✅ Use dynamic components as JSX (not function calls)
+const Countdown = dynamic(() => import("./components/Countdown"), {
+  ssr: false,
+  loading: () => null,
+});
 const GalleryLazy = dynamic(() => import("./components/Gallery"), {
   ssr: false,
   loading: () => null,
@@ -28,6 +32,7 @@ export default function Home() {
     document.body.style.overflowY = currentOverflow;
   }, [currentOverflow]);
 
+  // Lazy-mount Gallery when user scrolls near it
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el || showGallery) return;
@@ -52,16 +57,20 @@ export default function Home() {
         <Hero setCurrentOverflow={setCurrentOverflow} />
       </RevealWrapper>
 
+      {/* ✅ Use dynamic component as JSX */}
       <Countdown />
+
       <ArRum />
       <Profile />
       <WeddingEvents />
       <Reservation />
       <Bank />
 
+      {/* Sentinel where Gallery will appear */}
       <div ref={sentinelRef} aria-hidden className="h-1" />
 
-      {showGallery ? <GalleryLazy /> : null}
+      {/* ✅ Use dynamic component as JSX */}
+      {showGallery && <GalleryLazy />}
 
       <Footer />
     </main>
