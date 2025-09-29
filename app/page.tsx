@@ -19,7 +19,6 @@ const GalleryLazy = dynamic(() => import("./components/Gallery"), {
 });
 
 export default function Home() {
-  // 👇 change union type to string to match Hero.tsx
   const [currentOverflow, setCurrentOverflow] = useState<string>("hidden");
   const [showGallery, setShowGallery] = useState(false);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
