@@ -20,7 +20,7 @@ function Lightbox({ id, src, alt, prevId, nextId }: Props) {
     >
       {/* Backdrop (close: clear hash) */}
       <a
-        href="#"
+        href="#gallery"
         className="absolute inset-0 bg-slate-800/80"
         aria-label="Close preview"
       />
