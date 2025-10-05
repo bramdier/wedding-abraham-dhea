@@ -7,9 +7,7 @@ function Bank() {
         <section id="bank-section">
             <div className="bg-[url('/images/anNur/bg.png')] rounded-t-[1.25rem] bg-center bg-no-repeat bg-cover p-12 flex flex-col items-center text-center gap-8 -mt-8 z-20 relative font-light">
                 <RevealWrapper duration={1500} origin="top">
-                    <h1 className="italic text-4xl flex gap-4 text-[#A99C86]">
-                        <span>GIFT</span>
-                    </h1>
+                    <h1 className="text-xl italic font-light text-center text-black">Wedding Gift</h1>
                 </RevealWrapper>
                 <RevealWrapper duration={1500} origin="top">
                     <div className="grid grid-cols-1 gap-4 md:gap-6">
