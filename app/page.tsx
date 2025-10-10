@@ -12,7 +12,7 @@ import Bank from "./components/Bank";
 import Footer from "./components/Footer";
 import { RevealWrapper } from "next-reveal";
 
-// ✅ Use dynamic components as JSX (not function calls)
+
 const Countdown = dynamic(() => import("./components/Countdown"), {
   ssr: false,
   loading: () => null,
@@ -66,8 +66,8 @@ export default function Home() {
       <Reservation />
       <Bank />
 
-      {/* Sentinel where Gallery will appear */}
-      <div ref={sentinelRef} aria-hidden className="h-1" />
+      
+      
 
       {/* ✅ Use dynamic component as JSX */}
       {showGallery && <GalleryLazy />}
