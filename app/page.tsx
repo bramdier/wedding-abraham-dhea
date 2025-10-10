@@ -10,20 +10,21 @@ import WeddingEvents from "./components/WeddingEvents";
 import Reservation from "./components/Reservation";
 import Bank from "./components/Bank";
 import Footer from "./components/Footer";
-import PlayPause from "./components/PlayPause"; // ⬅️ tambahkan ini
 import { RevealWrapper } from "next-reveal";
 
 const Countdown = dynamic(() => import("./components/Countdown"), {
   ssr: false,
   loading: () => null,
 });
+
 const GalleryLazy = dynamic(() => import("./components/Gallery"), {
   ssr: false,
   loading: () => null,
 });
 
 export default function Home() {
-  const [currentOverflow, setCurrentOverflow] = useState<string>("auto");
+  // Kembali ke perilaku awal: scroll terkunci sampai "Buka Undangan" diklik
+  const [currentOverflow, setCurrentOverflow] = useState<string>("hidden");
   const [showGallery, setShowGallery] = useState(false);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
@@ -32,6 +33,7 @@ export default function Home() {
     document.body.style.overflowY = currentOverflow;
   }, [currentOverflow]);
 
+  // Lazy-mount Gallery saat pengguna mendekat ke posisinya
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el || showGallery) return;
@@ -52,40 +54,24 @@ export default function Home() {
 
   return (
     <main className="max-w-[28.125rem] mx-auto">
-      {/* 🔊 Audio global yang dikontrol tombol Play/Pause */}
-      <audio
-        id="global-bgm"
-        src="/audio/backsound.ogg"
-        autoPlay
-        loop
-        preload="auto"
-        playsInline
-        onCanPlay={(e) => {
-          try {
-            (e.currentTarget as HTMLAudioElement).volume = 0.25;
-          } catch {}
-        }}
-        className="hidden"
-      />
-
       <RevealWrapper duration={1500}>
         <Hero setCurrentOverflow={setCurrentOverflow} />
       </RevealWrapper>
 
+      
       <Countdown />
+
       <ArRum />
       <Profile />
       <WeddingEvents />
       <Reservation />
       <Bank />
 
+      
       <div ref={sentinelRef} />
       {showGallery && <GalleryLazy />}
 
       <Footer />
-
-      {/* 🎛️ Tombol mengambang Play/Pause */}
-      <PlayPause />
     </main>
   );
 }
