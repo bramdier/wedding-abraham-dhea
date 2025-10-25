@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Head from "next/head";
 import { RxEnvelopeOpen } from "react-icons/rx";
 import { RevealWrapper } from "next-reveal";
+import { useSearchParams } from "next/navigation";
 
 function Hero({
   setCurrentOverflow,
@@ -11,35 +12,55 @@ function Hero({
   setCurrentOverflow: React.Dispatch<React.SetStateAction<string>>;
 }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const searchParams = useSearchParams();
+  const [guestName, setGuestName] = useState<string | null>(null);
 
-  
+  // 🎧 Audio setup (tetap sama seperti versi asli)
   useEffect(() => {
     const el = audioRef.current;
     if (!el) return;
 
     const preferMp3 = !!el.canPlayType && !!el.canPlayType("audio/mpeg");
-    const preferOgg = !!el.canPlayType && !!el.canPlayType('audio/ogg; codecs="vorbis"');
+    const preferOgg =
+      !!el.canPlayType && !!el.canPlayType('audio/ogg; codecs="vorbis"');
 
-    
-    const src = preferMp3 ? "/audio/backsound.mp3" : (preferOgg ? "/audio/backsound.ogg" : "/audio/backsound.mp3");
+    const src = preferMp3
+      ? "/audio/backsound.mp3"
+      : preferOgg
+        ? "/audio/backsound.ogg"
+        : "/audio/backsound.mp3";
 
-    
     if (el.src !== window.location.origin + src && el.src !== src) {
       el.src = src;
     }
 
-    
     el.preload = "auto";
     el.loop = true;
-    
-    const onCanPlay = () => { try { el.volume = 0.25; } catch { } };
+
+    const onCanPlay = () => {
+      try {
+        el.volume = 0.25;
+      } catch { }
+    };
     el.addEventListener("canplay", onCanPlay);
 
-    
-    try { el.load(); } catch { }
+    try {
+      el.load();
+    } catch { }
 
     return () => el.removeEventListener("canplay", onCanPlay);
   }, []);
+
+  // 🎯 Ambil nama penerima dari query parameter ?to=Nama
+  useEffect(() => {
+    const to = searchParams.get("to");
+    if (to) {
+      const decoded = decodeURIComponent(to);
+      setGuestName(decoded);
+    } else {
+      setGuestName(null);
+    }
+  }, [searchParams]);
 
   const handleOpen = async () => {
     setCurrentOverflow("auto");
@@ -54,25 +75,17 @@ function Hero({
 
   return (
     <section id="hero">
-      
       <Head>
         <link
           rel="preload"
           href="/audio/backsound.mp3"
           as="audio"
           type="audio/mpeg"
-        
         />
       </Head>
 
       <div className="min-h-screen bg-[url('/images/hero/bg.jpg')] bg-cover bg-center text-white relative">
-        
-        <audio
-          id="global-bgm"
-          ref={audioRef}
-          playsInline
-          className="hidden"
-        />
+        <audio id="global-bgm" ref={audioRef} playsInline className="hidden" />
 
         <div className="absolute inset-0 bg-black/70 z-10" />
 
@@ -86,9 +99,19 @@ function Hero({
           </div>
 
           <div className="flex flex-col items-center gap-2">
-            <p className="text-[0.8rem]">Leviticus 11</p>
+            {/* 🪶 Tambahan teks dinamis */}
+            <RevealWrapper duration={1500} origin="bottom">
+              <p className="text-[0.9rem] italic mb-1 ">
+                <p>Kepada Yth</p>
+                {guestName
+                  ? guestName
+                  : "Bapak/Ibu/Saudara/i"}
+              </p>
+            </RevealWrapper>
+
             <p className="text-[0.8rem]">
-              Jl. Penyesuaian Tomang II No.1 Blok 11, Meruya Utara, Kec.Kembangan, Kota Jakarta Barat, DKI Jakarta
+              Tanpa Mengurangi Rasa Hormat, Kami Mengundang Saudara/i Terkasih
+              untuk Hadir di Acara Kami.
             </p>
 
             <RevealWrapper duration={4000} origin="bottom">
